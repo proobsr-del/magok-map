@@ -834,7 +834,7 @@ const indBox=document.getElementById('indBox'), indMin=document.getElementById('
 function setMin(m){indBox.classList.toggle('min',m); indMin.textContent=m?'Show':'Hide'; indMin.setAttribute('aria-expanded',!m);
   try{localStorage.setItem('magok-ind-min',m?'1':'0')}catch(e){}}
 indMin.onclick=()=>setMin(!indBox.classList.contains('min'));
-{ let v=null; try{ v=localStorage.getItem('magok-ind-min'); }catch(e){} if(v==='1'||(v===null&&innerWidth<560)) setMin(true); }   // phones start with the panel folded
+setMin(true);   // the industry panel always starts folded
 
 
 // subway lines in official colours, with station names
@@ -903,8 +903,9 @@ function setView(kind){
   tween={from:cam.position.clone(),to,ft:controls.target.clone(),tt,zf:cam.zoom,zt,t:0};
 }
 // phones held upright open on the framing of the approved phone screenshot (COEX and Magok Square in view); desktop keeps CENTER
-const STARTP=innerHeight>innerWidth, STARTC=STARTP?new THREE.Vector3(-20,0,-3):CENTER, STARTK=STARTP?1:fitK();
-cam.position.copy(STARTC).add(new THREE.Vector3(215,215,0.01).multiplyScalar(STARTK)); controls.target.copy(STARTC); controls.update(); // open in the 45° view facing west
+// open on the COEX view (same framing as the COEX button)
+cam.position.copy(COEX_T).add(new THREE.Vector3(69,58,-6)); controls.target.copy(COEX_T); cam.zoom=1.6; cam.updateProjectionMatrix(); controls.update();
+['vTop','vIso','vCoex'].forEach(id=>document.getElementById(id).setAttribute('aria-pressed',id==='vCoex'));
 document.getElementById('vTop').onclick=()=>setView('top');
 document.getElementById('vCoex').onclick=()=>setView('coex');
 document.getElementById('vIso').onclick=()=>setView('iso');
