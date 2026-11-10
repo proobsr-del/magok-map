@@ -193,10 +193,10 @@ const CATS={
   chem:  {name:"Energy · Chemicals · Materials", color:"#e08a1e"},
   mach:  {name:"Machinery · Equipment",        color:"#8d6a3f"},
   food:  {name:"Food",             color:"#d4a017"},
-  retail:{name:"Retail · Lifestyle",        color:"#9a5bb8"},
-  mice:  {name:"Convention (HIVE ART FAIR)", color:"#e5322d"},
+  retail:{name:"Fashion · Lifestyle",        color:"#9a5bb8"},
+  mice:  {name:"Convention center (HIVE)", color:"#e5322d"},
   culture:{name:"Culture · Arts",        color:"#1fa59c"},
-  mall:  {name:"Shopping mall",    color:"#e8649b"},
+  mall:  {name:"Retail · Mall",    color:"#e8649b"},
   air:   {name:"Airport",             color:"#6b7c93"},
 };
 // parts: [type, x, z, w, d, floors] — x,z offsets and w,d sizes as fractions of the lot; b=box, o=oval, r=courtyard
@@ -232,7 +232,7 @@ const EN={
   "LG사이언스파크":["LG Science Park","Electronics · Chemicals · Telecom R&D campus"],
   "코오롱 원앤온리타워":["Kolon One&Only Tower","Chemical materials · Bio"],
   "롯데중앙연구소":["Lotte R&D Center","Food R&D"],
-  "이랜드 글로벌R&D센터":["E-Land Global R&D Center","Retail · Fashion"],
+  "이랜드 글로벌R&D센터":["E-Land Global R&D Center","R&D · Design centre"],
   "넥센타이어":["Nexen Tire","Tires · Rubber materials"],
   "바이오메드":["Biomed","Bio · Medical"],
   "오스템임플란트":["Osstem Implant","Dental devices · Central Research Institute twin towers"],
@@ -817,10 +817,10 @@ bldgs.forEach(b=>{ if(!INFO[b.id]) return; b.el.dataset.key=b.id; b.el.setAttrib
   pl.addEventListener('click',()=>openInfo('plaza','Magok Square','','','Public square · Magongnaru Station'));}
 const indEl=document.getElementById('ind');
 let active=null;
-Object.entries(CATS).forEach(([k,c])=>{
+Object.entries(CATS).sort((x,y)=>(y[0]==='mice')-(x[0]==='mice')).forEach(([k,c])=>{   // HIVE ART FAIR venue first
   const list=bldgs.filter(b=>b.cat===k&&!b.el.hidden).map(b=>b.name); if(!list.length) return;
   const b=document.createElement('button'); b.id='cat-'+k; b.setAttribute('aria-pressed','false');
-  b.innerHTML=`<i style="background:${c.color}"></i><span>${c.name}</span><em>${list.length}</em>`;
+  b.innerHTML=`<i style="background:${c.color}"></i><span>${c.name}</span>`;
   b.onclick=()=>{active=active===k?null:k;
     indEl.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed','false'));
     if(active) b.setAttribute('aria-pressed','true');
