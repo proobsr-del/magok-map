@@ -79,6 +79,9 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font-ui);overflow:hi
 .bar{position:fixed;bottom:calc(12px + env(safe-area-inset-bottom,0px));left:max(16px,env(safe-area-inset-left,0px));
   right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;justify-content:space-between;pointer-events:none}
 .left{display:flex;flex-direction:column;gap:8px;align-items:flex-start;min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;min-width:0}
+#credit{position:fixed;z-index:2;right:max(8px,env(safe-area-inset-right,0px));bottom:calc(4px + env(safe-area-inset-bottom,0px));font-size:9.5px;color:var(--muted);background:color-mix(in srgb,var(--panel) 75%,transparent);padding:1px 6px;border-radius:4px;pointer-events:none}
+#padWrap{position:fixed;z-index:4;top:calc(18px + env(safe-area-inset-top,0px));right:calc(max(16px,env(safe-area-inset-right,0px)) + 64px)}
 .seg,.legend,.ind{pointer-events:auto;background:var(--panel);border:1px solid var(--line);border-radius:6px}
 .seg{display:flex;padding:3px;gap:2px}
 .seg button{font:600 12px var(--font-ui);border:0;background:none;color:var(--muted);padding:7px 12px;border-radius:4px;cursor:pointer}
@@ -112,7 +115,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
   .pad{display:none} .seg button{padding:6px 9px;font-size:11px} .ind{padding:5px 6px} .ind h2{font-size:10px}
   .ind .head button{font-size:10px;padding:1px 6px} .ind button{padding:3px 6px;font-size:11px}
   .legend{padding:4px 8px} .legend .credit{font-size:8.5px;line-height:1.3}
-  .bar{gap:6px;flex-direction:column;align-items:flex-start}
+  .bar{gap:6px;flex-direction:column;align-items:flex-start;bottom:calc(22px + env(safe-area-inset-bottom,0px))} #credit{font-size:8px}
   #compass svg{width:40px;height:40px}
   .lb{font-size:10px;padding:1px 5px}
 }
@@ -121,6 +124,15 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 <div id="stage"></div>
 <div id="labels"></div>
 <canvas id="pinLayer" aria-hidden="true"></canvas>
+<div id="credit">© OpenStreetMap contributors · Imagery ref. Google, Kakao, Apple, NAVER</div>
+<div id="padWrap">
+<div class="seg pad" role="group" aria-label="Rotate and tilt">
+    <button id="rL" title="Rotate left" aria-label="Rotate left">⟲</button>
+    <button id="rR" title="Rotate right" aria-label="Rotate right">⟳</button>
+    <button id="tU" title="Look down more" aria-label="Look down more">▲</button>
+    <button id="tD" title="Tilt toward horizon" aria-label="Tilt toward horizon">▼</button>
+</div>
+</div>
 <div id="compassWrap">
   <button id="compass" aria-expanded="false" aria-controls="dirs" title="Compass — choose a facing direction" aria-label="Compass">
     <svg viewBox="0 0 60 60" width="52" height="52" aria-hidden="true"><g id="needle">
@@ -157,6 +169,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 <div class="bar">
   <div class="left">
     <div class="ind" id="indBox"><div class="head"><h2>INDUSTRY · TAP TO HIGHLIGHT</h2><button id="indMin" aria-expanded="true" aria-controls="ind">Hide</button></div><div class="cats" id="ind" role="group" aria-label="Industry filter"></div></div>
+    <div class="row">
     <div class="seg" role="group" aria-label="View">
       <button id="vTop" aria-pressed="false">Top</button>
       <button id="vIso" aria-pressed="true">3D</button>
@@ -164,16 +177,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
       <button id="vLbl" aria-pressed="true">Labels</button>
       <button id="vMetro" aria-pressed="false" title="Show metro stations" aria-label="Metro stations">🚇</button>
     </div>
-    <div class="seg pad" role="group" aria-label="Rotate and tilt">
-      <button id="rL" title="Rotate left" aria-label="Rotate left">⟲</button>
-      <button id="rR" title="Rotate right" aria-label="Rotate right">⟳</button>
-      <button id="tU" title="Look down more" aria-label="Look down more">▲</button>
-      <button id="tD" title="Tilt toward horizon" aria-label="Tilt toward horizon">▼</button>
     </div>
-  </div>
-  <div class="legend">
-    
-    <span><b style="background:#6eaa5f"></b>Green space</span><span><b style="background:#5f9fcd"></b>Han River · lakes</span><span><b style="background:#996CAC;height:4px"></b>Line 5</span><span><b style="background:#BDB092;height:4px"></b>Line 9</span><span><b style="background:#0090D2;height:4px"></b>AREX</span><span class="credit">© OpenStreetMap contributors · Imagery ref. Google, Kakao, Apple, NAVER</span>
   </div>
 </div>
 
@@ -203,7 +207,7 @@ const CATS={
   retail:{name:"Fashion · Lifestyle",        color:"#9a5bb8"},
   mice:  {name:"Convention center", color:"#e5322d"},
   culture:{name:"Culture · Arts",        color:"#1fa59c"},
-  mall:  {name:"Retail · Mall",    color:"#e8649b"},
+  mall:  {name:"Shopping mall",    color:"#e8649b"},
   air:   {name:"Airport",             color:"#6b7c93"},
 };
 // parts: [type, x, z, w, d, floors] — x,z offsets and w,d sizes as fractions of the lot; b=box, o=oval, r=courtyard
@@ -1013,9 +1017,6 @@ function setActive(k){ active=k;
   indEl.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x.id===(k?'cat-'+k:'cat-all'))));
   document.body.classList.toggle('filtering',!!k);
   bldgs.forEach(o=>{const on=!k||o.cat===k||o.cat==='mice'; o.el.classList.toggle('dim',!on)}); }
-{ const a=document.createElement('button'); a.id='cat-all'; a.setAttribute('aria-pressed','true');
-  a.innerHTML='<i style="background:linear-gradient(135deg,#e5322d,#d4a017,#2f78b8,#4f9a3c)"></i><span>All</span>';
-  a.onclick=()=>setActive(null); indEl.appendChild(a); }
 Object.entries(CATS).filter(([k])=>k!=='mice').forEach(([k,c])=>{   // the HIVE venue (COEX Magok) is always shown, so it has no filter button
   const list=bldgs.filter(b=>b.cat===k&&!b.el.hidden).map(b=>b.name); if(!list.length) return;
   const b=document.createElement('button'); b.id='cat-'+k; b.setAttribute('aria-pressed','false');
@@ -1023,11 +1024,14 @@ Object.entries(CATS).filter(([k])=>k!=='mice').forEach(([k,c])=>{   // the HIVE 
   b.onclick=()=>setActive(active===k?null:k);   // buildings stay solid; labels of other industries hide, COEX Magok never does
   indEl.appendChild(b);
 });
+{ const a=document.createElement('button'); a.id='cat-all'; a.setAttribute('aria-pressed','true');
+  a.innerHTML='<i style="background:linear-gradient(135deg,#e5322d,#d4a017,#2f78b8,#4f9a3c)"></i><span>All</span>';
+  a.onclick=()=>setActive(null); indEl.appendChild(a); }
 const indBox=document.getElementById('indBox'), indMin=document.getElementById('indMin');
 function setMin(m){indBox.classList.toggle('min',m); indMin.textContent=m?'Show':'Hide'; indMin.setAttribute('aria-expanded',!m);
   try{localStorage.setItem('magok-ind-min',m?'1':'0')}catch(e){}}
 indMin.onclick=()=>setMin(!indBox.classList.contains('min'));
-setMin(true);   // the industry panel always starts folded
+setMin(false);   // the industry panel starts open
 
 
 // subway lines in official colours, with station names
