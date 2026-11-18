@@ -1091,8 +1091,8 @@ controls.addEventListener('start',()=>{tween=null});
 // views: top, 45° iso, and a close front view of COEX Magok seen across Magok Plaza from the east
 const COEX_T=new THREE.Vector3(-14,0,0);   // frames COEX Magok at the top with LG Science Park, the plaza and the park below
 function setView(kind){
-  let to, tt=CENTER.clone(), zt=kind==='coex'?1.6:1;
-  if(kind==='top') to=CENTER.clone().add(new THREE.Vector3(0,400*fitK(),0.01));
+  let to, tt=CENTER.clone(), zt=kind==='coex'?.8:1;   // COEX view zoom
+  if(kind==='top') to=CENTER.clone().add(new THREE.Vector3(0.01,400*fitK(),0));   // straight down, west at the top of the screen like the 3D view
   else if(kind==='iso') to=CENTER.clone().add(new THREE.Vector3(215,215,0.01).multiplyScalar(fitK())); /* 45° tilt, facing west */
   else { tt=COEX_T.clone(); to=COEX_T.clone().add(new THREE.Vector3(69,58,-6)); /* looking west from the east, ~50° tilt */ }
   ['vTop','vIso','vCoex'].forEach(id=>document.getElementById(id).setAttribute('aria-pressed',id===({top:'vTop',iso:'vIso',coex:'vCoex'})[kind]));
@@ -1101,7 +1101,7 @@ function setView(kind){
 }
 // phones held upright open on the framing of the approved phone screenshot (COEX and Magok Square in view); desktop keeps CENTER
 // open on the COEX view (same framing as the COEX button)
-cam.position.copy(COEX_T).add(new THREE.Vector3(69,58,-6)); controls.target.copy(COEX_T); cam.zoom=1.6; cam.updateProjectionMatrix(); controls.update();
+cam.position.copy(COEX_T).add(new THREE.Vector3(69,58,-6)); controls.target.copy(COEX_T); cam.zoom=.8; cam.updateProjectionMatrix(); controls.update();
 ['vTop','vIso','vCoex'].forEach(id=>document.getElementById(id).setAttribute('aria-pressed',id==='vCoex'));
 document.getElementById('vTop').onclick=()=>setView('top');
 document.getElementById('vCoex').onclick=()=>setView('coex');
