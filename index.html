@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>WHERE HIVE TAKES PLACE (MAP)</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,6 +25,8 @@ html,body{height:100%}
 body{background:var(--bg);color:var(--fg);font-family:var(--font-ui);overflow:hidden}
 #stage{position:fixed;inset:0}
 #stage canvas{display:block;touch-action:none}
+html,body{touch-action:none;overscroll-behavior:none}
+.ind,#info,.card{touch-action:pan-y}
 #labels{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1}
 #pinLayer{position:fixed;inset:0;pointer-events:none;z-index:2}
 .card,.bar{z-index:3}
@@ -120,6 +127,8 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
   .lb{font-size:10px;padding:1px 5px}
 }
 </style>
+</head>
+<body>
 
 <div id="stage"></div>
 <div id="labels"></div>
@@ -186,6 +195,8 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 <script>
 // show a readable message instead of a blank page if anything fails while building the scene
 window.__started=false;
+// pinch and double-tap belong to the map, not to page zoom (page zoom would shift the labels off their buildings)
+['gesturestart','gesturechange'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
 window.addEventListener('error',e=>{ if(window.__started||!e.message||/^Script error/.test(e.message)) return; let b=document.getElementById('errBox'); if(!b){b=document.createElement('div'); b.id='errBox';
   b.style.cssText='position:fixed;left:12px;right:12px;top:50%;transform:translateY(-50%);z-index:9;background:#fff;color:#1d2621;border:1px solid #c9cfca;border-radius:8px;padding:14px;font:13px system-ui;max-width:520px;margin:auto';
   document.body.appendChild(b);} b.textContent='The 3D map could not start: '+(e.message||e)+' (line '+(e.lineno||'?')+')';});
@@ -1077,9 +1088,10 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme)
 new MutationObserver(applyTheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 
 const CENTER=new THREE.Vector3(-42,0,6);
-const fitK=()=>Math.min(2.1,Math.max(1,1/(innerWidth/innerHeight*1.35)));   // >1 on portrait phones   // middle of the trimmed map (Magok in front, Gimpo Airport behind)
+const VW=()=>document.documentElement.clientWidth||innerWidth, VH=()=>document.documentElement.clientHeight||innerHeight;   // layout viewport: unaffected by browser pinch-zoom
+const fitK=()=>Math.min(2.1,Math.max(1,1/(VW()/VH()*1.35)));   // >1 on portrait phones   // middle of the trimmed map (Magok in front, Gimpo Airport behind)
 function resize(){
-  const w=innerWidth,h=innerHeight,asp=w/h;
+  const w=VW(),h=VH(),asp=w/h;
   cam.aspect=asp; cam.fov=asp<1?44:32; cam.updateProjectionMatrix();
   renderer.setSize(w,h); pinRenderer.setSize(w,h);
 }
@@ -1185,7 +1197,7 @@ function loop(){
   controls.update(); updateCompass(); renderer.render(scene,cam); pinRenderer.render(pinScene,cam);
   if(!window.__started){window.__started=true; const eb=document.getElementById('errBox'); if(eb) eb.remove();}
   if(!lblRoot.hidden){
-    const w=innerWidth,h=innerHeight;
+    const w=VW(),h=VH();
     for(const l of labels){ v.copy(l.pos).project(cam);
       l.el.style.left=((v.x+1)/2*w)+'px'; l.el.style.top=((1-v.y)/2*h)+'px'; }
   }
@@ -1207,3 +1219,5 @@ setTimeout(captureReflections,1500);
 resize(); loop();
 })();
 </script>
+</body>
+</html>
